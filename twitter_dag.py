@@ -3,7 +3,7 @@ from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.email_operator import EmailOperator
 from twitter import twitter_app
-from configurations.config import TWITTER_USER
+from configurations.config import TWITTER_USER, EMAIL_RECIPIENT
 
 
 html_email_str = """
@@ -34,8 +34,8 @@ get_tweets_task = PythonOperator(
 
 send_notif_task = EmailOperator(
     task_id='email_manager',
-    to='jrguevarra.21@gmail.com',
-    subject='NEW TWEETS UPLOADED',
+    to=EMAIL_RECIPIENT,
+    subject='New tweets uploaded to S3 bucket',
     html_content=html_email_str,
     params={'username': TWITTER_USER}
 )
