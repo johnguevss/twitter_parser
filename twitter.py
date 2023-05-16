@@ -2,12 +2,7 @@ import tweepy
 import json
 from datetime import datetime
 import s3fs
-import os
-
-access_key = os.environ.get("TWITTER_API_KEY") 
-access_secret = os.environ.get("TWITTER_API_SECRET")
-consumer_key = os.environ.get("TWITTER_ACCESS_TOKEN")
-consumer_secret = os.environ.get("TWITTER_ACCESS_TOKEN_SECRET")
+from configurations.config import *
 
 def fetch_twitter_data(account):
     try:
@@ -20,11 +15,8 @@ def fetch_twitter_data(account):
         print(f'{error}, please check provided api secrets and keys')
     else:
         tweets = twitter_api.user_timeline(screen_name=f'@{account}', 
-                        # 200 is the maximum allowed count
                         count=200,
                         include_rts = False,
-                        # Necessary to keep full_text 
-                        # otherwise only the first 140 words are extracted
                         tweet_mode = 'extended',
                         exclude_replies = True
                         )
@@ -35,11 +27,12 @@ def fetch_twitter_data(account):
     
 def write_as_json(account, dict:dict):
     try:
-        with open(f"{account}.json", "w") as f:
+        with open(f"{MY_S3_BUCKET}/{account}.json", "w") as f:
             json.dump(dict, f)
     except IOError as e:
         print(f"Error writing JSON file: {str(e)}")
 
+def twitter_app(account):
+    tweets_dict = fetch_twitter_data(account)
+    write_as_json(account, tweets_dict)
 
-tweets_dict = fetch_twitter_data('rempuff')
-write_as_json('rempuff', tweets_dict)
